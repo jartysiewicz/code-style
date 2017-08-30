@@ -5,12 +5,13 @@ Eclipse
 -------
 ##### Gradle setup
 * Add `copyEclipseSettings` task and edit `codeStylePath` to match your local path of code-style:
-```
+```groovy
 task downloadEclipseSettings(type: Download) {
+    downloadEclipseSettings.ext.suffix = project.name.endsWith('-wsdl') ? 'generated' : 'normal'
     def baseUrl = "https://raw.githubusercontent.com/mbazanski/code-style/master/eclipse/settings/"
     src([
         baseUrl + 'org.eclipse.core.resources.prefs',
-        baseUrl + 'org.eclipse.jdt.core.prefs_normal',
+        baseUrl + "org.eclipse.jdt.core.prefs_${downloadEclipseSettings.ext.suffix}",
         baseUrl + 'org.eclipse.jdt.ui.prefs',
     ])
     dest project.file('.settings')
@@ -22,12 +23,10 @@ task copyEclipseSettings(type: Copy) {
     from project.file('.settings')
     into project.file('.settings')
 
-    rename("org.eclipse.jdt.core.prefs_normal", "org.eclipse.jdt.core.prefs")
+    rename("org.eclipse.jdt.core.prefs_${downloadEclipseSettings.ext.suffix}", "org.eclipse.jdt.core.prefs")
 }
 ```
-* Run `./gradlew copyEclipseSettings`
-
-* (Optionally) Add eclipse plugin:
+* Add eclipse plugin:
 ```
 apply plugin: "eclipse"
 ```
@@ -36,6 +35,7 @@ and make `eclipse` task dependent on `copyEclipseSettings`:
 tasks["eclipse"].dependsOn copyEclipseSettings
 ```
 Code style settings will be applied when you generate IDE config using `eclipse` task
+or by manually run `./gradlew eclipse`
 
 
 IntelliJ IDEA
